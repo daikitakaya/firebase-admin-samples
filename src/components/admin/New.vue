@@ -1,10 +1,10 @@
 <template>
-  <div id="admin-index"></div>
+  <div id="admin-new"></div>
 </template>
 
 <script>
 export default {
-  name: 'AdminIndex'
+  name: 'AdminNew'
 }
 </script>
 
