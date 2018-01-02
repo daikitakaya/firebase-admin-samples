@@ -1,5 +1,7 @@
 <template>
-  <div id="admin-index"></div>
+  <div id="admin-index">
+    ありがとう
+  </div>
 </template>
 
 <script>
