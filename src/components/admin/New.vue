@@ -6,14 +6,8 @@
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b">
-      <el-menu-item index="1">Processing Center</el-menu-item>
-      <el-submenu index="2">
-        <template slot="title">Workspace</template>
-        <el-menu-item index="2-1">item one</el-menu-item>
-        <el-menu-item index="2-2">item two</el-menu-item>
-        <el-menu-item index="2-3">item three</el-menu-item>
-      </el-submenu>
-      <el-menu-item index="3"><a href="https://www.ele.me" target="_blank">Orders</a></el-menu-item>
+      <el-menu-item index="1">管理画面</el-menu-item>
+      <el-menu-item index="3"><a href="https://www.ele.me" target="_blank">ミッション一覧</a></el-menu-item>
     </el-menu>
     <el-container>
       <el-main>
@@ -36,7 +30,16 @@
             </el-col>
             <el-col :span="12" offset="1">
               <div>
-                <el-upload :on-change='onSelectedFile'>画像を選択</el-upload>
+                <el-upload
+                  :auto-upload="false"
+                  :on-change='onSelectedFile'
+                  :on-remove="handleRemoveImage"
+                  :limit="1"
+                  :on-exceed="handleOnExceed"
+                >
+                  <el-button size="small" type="primary">画像を選択</el-button>
+                </el-upload>
+                <div slot="tip" class="el-upload__tip">jpg/png形式のみアップロードできます</div>
               </div>
             </el-col>
           </el-row>
@@ -84,7 +87,7 @@ let data = {
   name: '',
   uploadFile: '',
   address: '',
-  image_url: '',
+  imageUrl: '',
   keyword: '',
   lng: 0.0,
   lat: 0.0
@@ -104,23 +107,31 @@ export default {
   data () {
     return data
   },
-  created () {
+  mounted () {
+    document.getElementById('admin-new').style.height = document.documentElement.clientHeight + 'px'
   },
   methods: {
     onSubmit: function () {
       missionsRef.add({ name: data.name, address: data.address, keyword: data.keyword
       }).then(doc => {
         const filePath = `images/${doc.id}/${data.uploadFile.name}`
-        console.log(filePath)
         storageRef.child(filePath).put(data.uploadFile.raw).then(snapshot => {
-          doc.update({image_url: snapshot.downloadURL})
+          doc.update({imageUrl: snapshot.downloadURL})
           clearData()
         })
       })
     },
     onSelectedFile: function (file, fileList) {
-      data.uploadFile = file
-      console.log(data.uploadFile)
+      const isJPG = file.type === 'image/jpg'
+      const isPNG = file.type === 'image/png'
+      if (!isJPG && !isPNG) {
+        this.$message.error('画像はjpg形式または、png形式のみアップロードできます')
+      } else {
+        data.uploadFile = file
+      }
+    },
+    handleOnExceed: function () {
+      this.$message.error('画像は1枚のみ設定できます')
     }
   }
 }
