@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import AdminIndex from '@/components/admin/Index'
-import AdminNew from '@/components/admin/New'
-import AdminEdit from '@/components/admin/Edit'
+import AdminMissionsNew from '@/components/admin/New'
+import AdminMissionsEdit from '@/components/admin/Edit'
 
 Vue.use(Router)
 
@@ -15,13 +15,13 @@ export default new Router({
     },
     {
       path: '/admin/new',
-      name: 'AdminNew',
-      component: AdminNew
+      name: 'AdminMissionsNew',
+      component: AdminMissionsNew
     },
     {
-      path: '/admin/edit',
-      name: 'AdminNew',
-      component: AdminEdit
+      path: '/admin/:id/edit',
+      name: 'AdminMissionsMissionsNew',
+      component: AdminMissionsEdit
     }
   ]
 })

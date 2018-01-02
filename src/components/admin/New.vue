@@ -1,14 +1,6 @@
 <template>
   <div id="admin-new">
-    <el-menu
-      class="el-menu-demo"
-      mode="horizontal"
-      background-color="#545c64"
-      text-color="#fff"
-      active-text-color="#ffd04b">
-      <el-menu-item>管理画面</el-menu-item>
-      <el-menu-item index="3"><a href="https://www.ele.me" target="_blank">ミッション一覧</a></el-menu-item>
-    </el-menu>
+    <admin-header></admin-header>
     <el-container>
       <el-main>
         <div class="main-content">
@@ -78,7 +70,9 @@
 </template>
 
 <script>
+import AdminHeader from './AdminHeader'
 import firebaseApp from '../../firebaseApp'
+import firebase from 'firebase'
 const db = firebaseApp.firestore()
 const missionsRef = db.collection('missions')
 const storageRef = firebaseApp.storage().ref()
@@ -100,12 +94,16 @@ function clearData () {
   data.address = ''
   data.image_url = ''
   data.keyword = ''
+  data.fullscreenLoading = false
 }
 
 export default {
   name: 'AdminNew',
   data () {
     return data
+  },
+  components: {
+    AdminHeader
   },
   mounted () {
     document.getElementById('admin-new').style.height = document.documentElement.clientHeight + 'px'
@@ -130,15 +128,14 @@ export default {
     onSubmit: function () {
       data.fullscreenLoading = true
       if (this.isValid) {
-        missionsRef.add({ name: data.name, address: data.address, keyword: data.keyword
-      }).then(doc => {
-        const filePath = `images/${doc.id}/${data.uploadFile.name}`
-        storageRef.child(filePath).put(data.uploadFile.raw).then(snapshot => {
-          doc.update({imageUrl: snapshot.downloadURL})
-          data.fullscreenLoading = false
-          clearData()
+        missionsRef.add({ name: data.name, address: data.address, keyword: data.keyword, lng: data.lng, lat: data.lat, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(doc => {
+          const filePath = `images/${doc.id}/${data.uploadFile.name}`
+          storageRef.child(filePath).put(data.uploadFile.raw).then(snapshot => {
+            doc.update({imageUrl: snapshot.downloadURL})
+            clearData()
+          })
         })
-      })
       } else {
         data.fullscreenLoading = false
         this.$message.error('未入力の項目があります')
@@ -146,8 +143,10 @@ export default {
     },
     onSelectedFile: function (file, fileList) {
       const isJPG = file.raw.type === 'image/jpg'
+      const isJPEG = file.raw.type === 'image/jpeg'
       const isPNG = file.raw.type === 'image/png'
-      if (!isJPG && !isPNG) {
+      console.log(file.raw.type)
+      if (!isJPG && !isPNG && !isJPEG) {
         this.$message.error('画像はjpg形式または、png形式のみアップロードできます')
       } else {
         data.uploadFile = file
